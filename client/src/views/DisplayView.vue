@@ -47,19 +47,19 @@ onUnmounted(() => {
     <div class="flex flex-1 flex-row">
       <!-- 屏幕录制占位 -->
       <div
-        class="flex-1 border-2 border-dashed border-gray-600" 
+        class="flex-1 custom-dashed-border" 
         style="aspect-ratio: 16 / 9; background-color: rgba(255, 255, 255, 0.05);"
       ></div>
 
       <!-- 直播间介绍文本 -->
-      <div class="w-1/1 bg-gray-800/50 p-4 rounded-lg ml-4">
+      <div class="w-1/1 custom-bg p-4 rounded-lg ml-4">
         <p class="text-white text-2xl modern-font" style="white-space: pre-wrap;">{{ introText }}</p>
       </div>
     </div>
 
     <!-- 下部打字机区域 -->
     <div
-      class="bg-gray-800/50 p-4 rounded-lg mt-4 w-full"
+      class="custom-bg p-4 rounded-lg mt-4 w-full"
       style="height: 250px"
     >
       <div class="text-white font-mono text-4xl modern-font" style="white-space: pre-wrap">
@@ -96,5 +96,13 @@ onUnmounted(() => {
 .tty span {
   display: inline-block;
   opacity: 1;
+}
+
+.custom-dashed-border {
+  border: 2px dashed #4B5563; /* Tailwind's gray-600 color */
+}
+
+.custom-bg {
+  background-color: rgba(30, 41, 57, 0.5); /* oklch(0.278 0.033 256.848) with 50% transparency */
 }
 </style>
