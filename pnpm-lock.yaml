@@ -11,6 +11,9 @@ importers:
       '@fastify/static':
         specifier: ^8.0.4
         version: 8.0.4
+      '@heroicons/vue':
+        specifier: ^2.2.0
+        version: 2.2.0(vue@3.5.13)
       fastify:
         specifier: ^5.2.1
         version: 5.2.1
@@ -39,6 +42,9 @@ importers:
       concurrently:
         specifier: ^9.1.2
         version: 9.1.2
+      notosans-fontface:
+        specifier: ^1.3.0
+        version: 1.3.0
       tailwindcss:
         specifier: ^4.0.4
         version: 4.0.4
@@ -241,6 +247,11 @@ packages:
 
   '@fastify/static@8.0.4':
     resolution: {integrity: sha512-JdJIlXDYXZxbTFQazWOEfHxyD5uRXqRsLnp4rV9MwJnxadA0rrWBI8ZelPF2TPk/xDi5wunY/6ZmfwHXld13bA==}
+
+  '@heroicons/vue@2.2.0':
+    resolution: {integrity: sha512-G3dbSxoeEKqbi/DFalhRxJU4mTXJn7GwZ7ae8NuEQzd1bqdd0jAbdaBZlHPcvPD2xI1iGzNVB4k20Un2AguYPw==}
+    peerDependencies:
+      vue: '>= 3'
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -853,6 +864,9 @@ packages:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
 
+  notosans-fontface@1.3.0:
+    resolution: {integrity: sha512-AEgyYAM09pxPGT0Vmi7Eq/naPeZPsNVvsWmqq9bW6jXRIsx3fuaZNIU31hGAtG/HkKCsUziB+8L2SFZATi1eHA==}
+
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
@@ -1297,6 +1311,10 @@ snapshots:
       fastify-plugin: 5.0.1
       fastq: 1.19.0
       glob: 11.0.1
+
+  '@heroicons/vue@2.2.0(vue@3.5.13)':
+    dependencies:
+      vue: 3.5.13
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -1860,6 +1878,8 @@ snapshots:
   nanoid@3.3.8: {}
 
   negotiator@0.6.3: {}
+
+  notosans-fontface@1.3.0: {}
 
   object-assign@4.1.1: {}
 

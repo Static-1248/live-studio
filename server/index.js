@@ -30,9 +30,15 @@ const io = new Server(fastify.server, {
 io.on('connection', (socket) => {
   console.log(`Client connected [${socket.id}] from:`, socket.handshake.headers.origin)
 
-  socket.on('textUpdated', (text) => {
-    console.log(`Received text from ${socket.id}:`, text)
-    io.emit('textUpdated', text)
+  socket.on('ttyUpdated', (text) => { // Rename this event
+    console.log(`Received tty text from ${socket.id}:`, text)
+    io.emit('ttyUpdated', text) // Rename this event
+  })
+
+  // Rename this block for intro updates
+  socket.on('introUpdated', (description) => {
+    console.log(`Received intro tez=xt from ${socket.id}:`, description)
+    io.emit('introUpdated', description) // Rename this event
   })
 
   socket.on('disconnect', () => {
