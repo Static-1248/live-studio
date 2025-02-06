@@ -6,17 +6,16 @@ const store = useWebSocketStore()
 const inputText = ref('')
 
 onMounted(() => {
-  store.initControl()
+  store.init()
 })
 
 const sendUpdate = () => {
-  store.controlSocket.emit('textUpdated', inputText.value)
-  console.log(store.controlSocket)
-  console.log(store.displaySocket)
+  store.socket.emit('textUpdated', inputText.value)
+  console.log(store.socket)
 }
 
 onUnmounted(() => {
-  store.controlSocket?.disconnect()
+  store.socket?.disconnect()
 })
 </script>
 
