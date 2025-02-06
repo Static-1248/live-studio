@@ -12,10 +12,20 @@ const fastify = Fastify({
   }
 })
 
-// Remove @fastify/websocket registration
+// Add this hook to set the response header
+fastify.addHook('onSend', (request, reply, payload, done) => {
+  reply.header('X-Frame-Options', 'ALLOW-FROM https://play-live.bilibili.com/')
+  done()
+})
+
 await fastify.register(fastifyStatic, {
   root: resolve(process.cwd(), 'client/dist'),
   prefix: '/'
+})
+
+// Add this fallback route
+fastify.setNotFoundHandler((request, reply) => {
+  reply.sendFile('index.html')
 })
 
 // Initialize socket.io directly
@@ -37,7 +47,7 @@ io.on('connection', (socket) => {
 
   // Rename this block for intro updates
   socket.on('introUpdated', (description) => {
-    console.log(`Received intro tez=xt from ${socket.id}:`, description)
+    console.log(`Received intro text from ${socket.id}:`, description)
     io.emit('introUpdated', description) // Rename this event
   })
 

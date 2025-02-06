@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useWebSocketStore } from "../stores/websocket";
+import BackgroundEffect from "../components/BackgroundEffect.vue";
 
 const store = useWebSocketStore();
 const ttyText = ref(localStorage.getItem("display_ttyText") || "");
@@ -8,6 +9,7 @@ const introText = ref(localStorage.getItem("display_introText") || "");
 const isFadingOut = ref(false);
 
 onMounted(() => {
+  document.title = "web直播间";
   store.init();
   store.socket.on("ttyUpdated", (text) => {
     isFadingOut.value = true;
@@ -39,7 +41,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-screen w-full bg-gray-900 p-4 flex flex-col">
+  <div class="h-screen w-full p-4 flex flex-col">
+    <BackgroundEffect /> <!-- Starfield background Effect -->
     <!-- 上部区域 -->
     <div class="flex flex-1 flex-row">
       <!-- 屏幕录制占位 -->
@@ -49,17 +52,17 @@ onUnmounted(() => {
       ></div>
 
       <!-- 直播间介绍文本 -->
-      <div class="w-1/4 bg-gray-800 bg-opacity-75 p-4 rounded-lg ml-4">
-        <p class="text-white modern-font" style="white-space: pre-wrap;">{{ introText }}</p>
+      <div class="w-1/1 bg-gray-800/50 p-4 rounded-lg ml-4">
+        <p class="text-white text-2xl modern-font" style="white-space: pre-wrap;">{{ introText }}</p>
       </div>
     </div>
 
     <!-- 下部打字机区域 -->
     <div
-      class="bg-gray-800 bg-opacity-90 p-4 rounded-lg mt-4 w-full"
-      style="height: 150px"
+      class="bg-gray-800/50 p-4 rounded-lg mt-4 w-full"
+      style="height: 250px"
     >
-      <div class="text-white font-mono text-xl modern-font" style="white-space: pre-wrap">
+      <div class="text-white font-mono text-4xl modern-font" style="white-space: pre-wrap">
         <div class="tty">
             <span :class="{ 'fade-out': isFadingOut }">
               {{ 
