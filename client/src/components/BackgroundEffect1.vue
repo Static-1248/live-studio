@@ -1,5 +1,5 @@
 <template>
-  <div class="background-effect">
+  <div class="background-effect1">
     <canvas id="space"></canvas>
   </div>
 </template>
@@ -16,10 +16,10 @@ onMounted(() => {
   const ctx = canvas.getContext('2d');
 
   const CONFIG = {
-    STAR_COUNT: 300,
-    BASE_SPEED: 0.3,
+    STAR_COUNT: 400,
+    BASE_SPEED: 4,
     TWINKLE_CONFIG: {
-      FREQ_AVG: 2,
+      FREQ_AVG: 5,
       FREQ_STDDEV: 0.0002,
     },
     SIZE_VARIATION: 1.5,
@@ -59,6 +59,11 @@ onMounted(() => {
     };
   });
 
+  function preanimate() {
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
   function animate() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -93,6 +98,7 @@ onMounted(() => {
 
     requestAnimationFrame(animate);
   }
+  preanimate();
   animate();
 
   onBeforeUnmount(() => {
@@ -102,7 +108,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.background-effect {
+.background-effect1 {
   position: fixed;
   top: 0;
   left: 0;

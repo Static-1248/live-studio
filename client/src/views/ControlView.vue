@@ -16,6 +16,9 @@ const activeIntroIndex = ref(null)
 const showTtySavedMessage = ref(false)
 const showIntroSavedMessage = ref(false)
 
+const showTtyUpdatedMessage = ref(false)
+const showIntroUpdatedMessage = ref(false)
+
 const loadFromLocalStorage = () => {
   const savedTtyHistory = JSON.parse(localStorage.getItem('control_ttyHistory') || '[]')
   const savedIntroHistory = JSON.parse(localStorage.getItem('control_introHistory') || '[]')
@@ -59,11 +62,13 @@ onMounted(() => {
   sendTtyUpdate()
   sendIntroUpdate()
   window.addEventListener('keydown', handleSave)
+  window.addEventListener('keydown', handleUpdate)
 })
 
 onUnmounted(() => {
   store.socket?.disconnect()
   window.removeEventListener('keydown', handleSave)
+  window.removeEventListener('keydown', handleUpdate)
 })
 
 watch([ttyHistory, introHistory, activeTtyIndex, activeIntroIndex], saveToLocalStorage, { deep: true })
@@ -73,6 +78,10 @@ const sendTtyUpdate = () => {
     ttyHistory.value[activeTtyIndex.value].content = ttyText.value
   }
   store.socket.emit('ttyUpdated', ttyText.value)
+  showTtyUpdatedMessage.value = true
+  setTimeout(() => {
+    showTtyUpdatedMessage.value = false
+  }, 2000)
 }
 
 const sendIntroUpdate = () => {
@@ -80,6 +89,10 @@ const sendIntroUpdate = () => {
     introHistory.value[activeIntroIndex.value].content = introText.value
   }
   store.socket.emit('introUpdated', introText.value)
+  showIntroUpdatedMessage.value = true
+  setTimeout(() => {
+    showIntroUpdatedMessage.value = false
+  }, 2000)
 }
 
 const newTtyRecord = () => {
@@ -182,7 +195,6 @@ const moveIntroRecordToTop = (index) => {
 
 const handleSave = (event) => {
   if (event.ctrlKey && event.key === 's') {
-    console.log('ctrl+s')
     event.preventDefault()
     if (document.activeElement === document.querySelector('.tty-container textarea')) {
       saveTtyRecord()
@@ -195,12 +207,26 @@ const handleSave = (event) => {
   }
 }
 
+const handleUpdate = (event) => {
+  if (event.ctrlKey && event.key === 'u') {
+    event.preventDefault()
+    if (document.activeElement === document.querySelector('.tty-container textarea')) {
+      sendTtyUpdate()
+    } else if (document.activeElement === document.querySelector('.intro-container textarea')) {
+      sendIntroUpdate()
+    } else {
+      sendTtyUpdate()
+      sendIntroUpdate()
+    }
+  }
+}
+
 const detailMax = 10
 </script>
 
 <template>
   <div class="p-4 bg-gray-900 text-white min-h-screen overflow-y-auto">
-    <div class="max-w-2xl mx-auto" style="height: 300px;">
+    <div class="max-w-3xl mx-auto" style="height: 300px;">
       <div class="relative mb-4 flex h-full tty-container">
         <div class="flex-1 flex flex-col">
           <h2 class="text-lg font-semibold mb-2">打字机文本</h2>
@@ -235,6 +261,12 @@ const detailMax = 10
               <span v-if="showTtySavedMessage" class="flex items-center space-x-1 text-white">
                 <CheckIcon class="w-5 h-5 text-green-400" />
                 <span>已保存！</span>
+              </span>
+            </transition>
+            <transition name="fade">
+              <span v-if="showTtyUpdatedMessage" class="flex items-center space-x-1 text-white">
+                <CheckIcon class="w-5 h-5 text-blue-400" />
+                <span>已更新！</span>
               </span>
             </transition>
           </div>
@@ -299,6 +331,12 @@ const detailMax = 10
               <span v-if="showIntroSavedMessage" class="flex items-center space-x-1 text-white">
                 <CheckIcon class="w-5 h-5 text-green-400" />
                 <span>已保存！</span>
+              </span>
+            </transition>
+            <transition name="fade">
+              <span v-if="showIntroUpdatedMessage" class="flex items-center space-x-1 text-white">
+                <CheckIcon class="w-5 h-5 text-blue-400" />
+                <span>已更新！</span>
               </span>
             </transition>
           </div>
