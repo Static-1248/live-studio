@@ -6,15 +6,23 @@ import { PaperAirplaneIcon, BookmarkSquareIcon, PlusIcon, XMarkIcon, ArrowUpIcon
 const store = useWebSocketStore()
 const ttyText = ref('')
 const introText = ref('')
+const bannerText = ref('')
 
 // Add history arrays and active index
 const ttyHistory = ref([])
 const introHistory = ref([])
 const activeTtyIndex = ref(null)
+const bannerHistory = ref([])
+const activeBannerIndex = ref(null)
 const activeIntroIndex = ref(null)
 
 const showTtySavedMessage = ref(false)
+const showBannerSavedMessage = ref(false)
 const showIntroSavedMessage = ref(false)
+
+const showTtyUpdatedMessage = ref(false)
+const showBannerUpdatedMessage = ref(false)
+const showIntroUpdatedMessage = ref(false)
 
 const loadFromLocalStorage = () => {
   const savedTtyHistory = JSON.parse(localStorage.getItem('control_ttyHistory') || '[]')
@@ -43,6 +51,19 @@ const loadFromLocalStorage = () => {
     activeIntroIndex.value = 0
     introText.value = initIntroRecord.content
   }
+
+  const savedBannerHistory = JSON.parse(localStorage.getItem('control_bannerHistory') || '[]')
+  const savedActiveBannerIndex = JSON.parse(localStorage.getItem('control_activeBannerIndex'))
+  if (savedBannerHistory.length) {
+    bannerHistory.value = savedBannerHistory
+    activeBannerIndex.value = savedActiveBannerIndex
+    bannerText.value = bannerHistory.value[activeBannerIndex.value]?.content || ''
+  } else {
+    const initBannerRecord = { content: '', timestamp: new Date() }
+    bannerHistory.value.push(initBannerRecord)
+    activeBannerIndex.value = 0
+    bannerText.value = initBannerRecord.content
+  }
 }
 
 const saveToLocalStorage = () => {
@@ -50,6 +71,8 @@ const saveToLocalStorage = () => {
   localStorage.setItem('control_introHistory', JSON.stringify(introHistory.value))
   localStorage.setItem('control_activeTtyIndex', JSON.stringify(activeTtyIndex.value))
   localStorage.setItem('control_activeIntroIndex', JSON.stringify(activeIntroIndex.value))
+  localStorage.setItem('control_bannerHistory', JSON.stringify(bannerHistory.value))
+  localStorage.setItem('control_activeBannerIndex', JSON.stringify(activeBannerIndex.value))
 }
 
 onMounted(() => {
@@ -57,22 +80,29 @@ onMounted(() => {
   loadFromLocalStorage()
   // 启动时发送一次
   sendTtyUpdate()
+  sendBannerUpdate()
   sendIntroUpdate()
   window.addEventListener('keydown', handleSave)
+  window.addEventListener('keydown', handleUpdate)
 })
 
 onUnmounted(() => {
   store.socket?.disconnect()
   window.removeEventListener('keydown', handleSave)
+  window.removeEventListener('keydown', handleUpdate)
 })
 
-watch([ttyHistory, introHistory, activeTtyIndex, activeIntroIndex], saveToLocalStorage, { deep: true })
+watch([ttyHistory, introHistory, bannerHistory, activeTtyIndex, activeIntroIndex, activeBannerIndex], saveToLocalStorage, { deep: true })
 
 const sendTtyUpdate = () => {
   if (activeTtyIndex.value !== null) {
     ttyHistory.value[activeTtyIndex.value].content = ttyText.value
   }
   store.socket.emit('ttyUpdated', ttyText.value)
+  showTtyUpdatedMessage.value = true
+  setTimeout(() => {
+    showTtyUpdatedMessage.value = false
+  }, 2000)
 }
 
 const sendIntroUpdate = () => {
@@ -80,7 +110,23 @@ const sendIntroUpdate = () => {
     introHistory.value[activeIntroIndex.value].content = introText.value
   }
   store.socket.emit('introUpdated', introText.value)
+  showIntroUpdatedMessage.value = true
+  setTimeout(() => {
+    showIntroUpdatedMessage.value = false
+  }, 2000)
 }
+
+const sendBannerUpdate = () => {
+  if (activeBannerIndex.value !== null) {
+    bannerHistory.value[activeBannerIndex.value].content = bannerText.value
+  }
+  store.socket.emit('bannerUpdated', bannerText.value)
+  showBannerUpdatedMessage.value = true
+  setTimeout(() => {
+    showBannerUpdatedMessage.value = false
+  }, 2000)
+}
+
 
 const newTtyRecord = () => {
   const newRecord = { content: '', timestamp: new Date() }
@@ -97,6 +143,28 @@ const saveTtyRecord = () => {
       showTtySavedMessage.value = false
     }, 2000)
   }
+}
+
+const newBannerRecord = () => {
+  const newRecord = { content: '', timestamp: new Date() }
+  bannerHistory.value.unshift(newRecord)
+  activeBannerIndex.value = 0
+  bannerText.value = ''
+}
+
+const saveBannerRecord = () => {
+  if (activeBannerIndex.value !== null) {
+    bannerHistory.value[activeBannerIndex.value].content = bannerText.value
+    showBannerSavedMessage.value = true
+    setTimeout(() => {
+      showBannerSavedMessage.value = false
+    }, 2000)
+  }
+}
+
+const setActiveBannerRecord = (index) => {
+  activeBannerIndex.value = index
+  bannerText.value = bannerHistory.value[index].content
 }
 
 const newIntroRecord = () => {
@@ -180,17 +248,58 @@ const moveIntroRecordToTop = (index) => {
   }
 }
 
+const deleteBannerRecord = (index) => {
+  bannerHistory.value.splice(index, 1)
+  if (bannerHistory.value.length === 0) {
+    const initBannerRecord = { content: '', timestamp: new Date() }
+    bannerHistory.value.push(initBannerRecord)
+    activeBannerIndex.value = 0
+    bannerText.value = initBannerRecord.content
+  } else if (activeBannerIndex.value === index) {
+    if (index < bannerHistory.value.length) {
+      activeBannerIndex.value = index
+    } else {
+      activeBannerIndex.value = bannerHistory.value.length - 1
+    }
+    bannerText.value = bannerHistory.value[activeBannerIndex.value].content
+  }
+}
+
+const moveBannerRecordToTop = (index) => {
+  const [record] = bannerHistory.value.splice(index, 1)
+  bannerHistory.value.unshift(record)
+  if (activeBannerIndex.value === index) {
+    activeBannerIndex.value = 0
+  }
+}
 const handleSave = (event) => {
   if (event.ctrlKey && event.key === 's') {
-    console.log('ctrl+s')
     event.preventDefault()
     if (document.activeElement === document.querySelector('.tty-container textarea')) {
       saveTtyRecord()
     } else if (document.activeElement === document.querySelector('.intro-container textarea')) {
       saveIntroRecord()
+    } else if (document.activeElement === document.querySelector('.banner-container textarea')) {
+      saveBannerRecord()
     } else {
       saveTtyRecord()
       saveIntroRecord()
+    }
+  }
+}
+
+const handleUpdate = (event) => {
+  if (event.ctrlKey && event.key === 'u') {
+    event.preventDefault()
+    if (document.activeElement === document.querySelector('.tty-container textarea')) {
+      sendTtyUpdate()
+    } else if (document.activeElement === document.querySelector('.intro-container textarea')) {
+      sendIntroUpdate()
+    } else if (document.activeElement === document.querySelector('.banner-container textarea')) {
+      sendBannerUpdate()
+    } else {
+      sendTtyUpdate()
+      sendIntroUpdate()
     }
   }
 }
@@ -199,8 +308,8 @@ const detailMax = 10
 </script>
 
 <template>
-  <div class="p-4 bg-gray-900 text-white min-h-screen overflow-y-auto">
-    <div class="max-w-2xl mx-auto" style="height: 300px;">
+  <div class="p-4 bg-gray-900 text-white min-h-screen overflow-y-auto space-y-8">
+    <div class="max-w-3xl mx-auto" style="height: 300px;">
       <div class="relative mb-4 flex h-full tty-container">
         <div class="flex-1 flex flex-col">
           <h2 class="text-lg font-semibold mb-2">打字机文本</h2>
@@ -235,6 +344,12 @@ const detailMax = 10
               <span v-if="showTtySavedMessage" class="flex items-center space-x-1 text-white">
                 <CheckIcon class="w-5 h-5 text-green-400" />
                 <span>已保存！</span>
+              </span>
+            </transition>
+            <transition name="fade">
+              <span v-if="showTtyUpdatedMessage" class="flex items-center space-x-1 text-white">
+                <CheckIcon class="w-5 h-5 text-blue-400" />
+                <span>已更新！</span>
               </span>
             </transition>
           </div>
@@ -301,6 +416,12 @@ const detailMax = 10
                 <span>已保存！</span>
               </span>
             </transition>
+            <transition name="fade">
+              <span v-if="showIntroUpdatedMessage" class="flex items-center space-x-1 text-white">
+                <CheckIcon class="w-5 h-5 text-blue-400" />
+                <span>已更新！</span>
+              </span>
+            </transition>
           </div>
         </div>
         <div class="w-64 ml-4 overflow-y-auto" style="height: 100%;">
@@ -328,6 +449,78 @@ const detailMax = 10
           </ul>
         </div>
       </div>
+
+      <!-- 新增横幅控制模块 -->
+      <div class="relative mb-4 mt-8 flex h-full banner-container">
+        <div class="flex-1 flex flex-col">
+          <h2 class="text-lg font-semibold mb-2">直播间横幅</h2>
+          <textarea 
+            v-model="bannerText"
+            class="w-full h-20 p-2 border border-gray-700 rounded bg-gray-800 text-white flex-grow"
+            placeholder="输入横幅文字..."
+          ></textarea>
+          <div class="flex space-x-2 mt-2">
+            <button 
+              @click="sendBannerUpdate"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center space-x-1 transition-colors duration-300"
+            >
+              <PaperAirplaneIcon class="w-5 h-5" />
+              <span>更新</span>
+            </button>
+            <button 
+              @click="newBannerRecord"
+              class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 flex items-center space-x-1 transition-colors duration-300"
+            >
+              <PlusIcon class="w-5 h-5" />
+              <span>新建</span>
+            </button>
+            <button 
+              @click="saveBannerRecord"
+              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center space-x-1 transition-colors duration-300"
+            >
+              <BookmarkSquareIcon class="w-5 h-5" />
+              <span>保存</span>
+            </button>
+            <transition name="fade">
+              <span v-if="showBannerSavedMessage" class="flex items-center space-x-1 text-white">
+                <CheckIcon class="w-5 h-5 text-green-400" />
+                <span>已保存！</span>
+              </span>
+            </transition>
+            <transition name="fade">
+              <span v-if="showBannerUpdatedMessage" class="flex items-center space-x-1 text-white">
+                <CheckIcon class="w-5 h-5 text-blue-400" />
+                <span>已更新！</span>
+              </span>
+            </transition>
+          </div>
+        </div>
+        <div class="w-64 ml-4 overflow-y-auto" style="height: 100%;">
+          <h2 class="text-lg font-semibold mb-2">历史记录</h2>
+          <ul>
+            <li 
+              v-for="(record, index) in bannerHistory" 
+              :key="index" 
+              :class="{'bg-gray-700': activeBannerIndex === index, 'bg-gray-800': activeBannerIndex !== index}"
+              class="flex justify-between items-center p-2 border border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors duration-300" 
+              @click="setActiveBannerRecord(index)"
+            >
+              <span>{{ record.content.length > detailMax ? record.content.slice(0, detailMax - 3) + '...' : record.content }}</span>
+              <div class="flex space-x-2">
+                <button @click.stop="deleteBannerRecord(index)" class="flex items-center space-x-1">
+                  <XMarkIcon class="w-5 h-5" />
+                  <!-- <span>删除</span> -->
+                </button>
+                <button @click.stop="moveBannerRecordToTop(index)" class="flex items-center space-x-1">
+                  <ArrowUpIcon class="w-5 h-5" />
+                  <!-- <span>置顶</span> -->
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
     </div>
   </div>
 </template>

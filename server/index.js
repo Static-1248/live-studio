@@ -51,6 +51,12 @@ io.on('connection', (socket) => {
     io.emit('introUpdated', description) // Rename this event
   })
 
+  socket.on('bannerUpdated', (text) => {
+    console.log(`Received banner text from ${socket.id}:`, text)
+    io.emit('bannerUpdated', text)
+    // 持久化存储逻辑需要先引入fs模块
+  })
+
   socket.on('disconnect', () => {
     console.log(`Client disconnected [${socket.id}]`)
   })
