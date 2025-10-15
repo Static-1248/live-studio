@@ -1,3 +1,5 @@
+[English](./README.md) | [简体中文](./README.zh-CN.md)
+
 # Live Studio
 
 Live Studio is a web application that provides a live streaming interface with real-time updates using WebSockets.
@@ -60,6 +62,14 @@ pnpm run dev
 
 This will start the server on `http://localhost:3000` and the client on `http://localhost:5173/display` & `http://localhost:5173/control`.
 
+(If you see the server warning "path xxx/client/dist must exist", you can ignore it. This is not necessary in development mode.)
+
+### Recommended Usage
+
+1. The display page (`/display`) is used to showcase the live stream UI framework. So for example, you can create a webview component in your live stream software and point it to `http://localhost:3000/display`.
+
+2. Open the control page (`/control`, `http://localhost:5173/control`) in a separate browser tab, and use it to manage and control the stream. It is also recommended to register the control page as a desktop app via your browser.
+
 ### Project Details
 
 - The server is implemented using Fastify and Socket.IO.
@@ -78,15 +88,15 @@ To deploy the application for production, follow these steps:
 
 1. Build the client project:
     ```sh
-    pnpm run build
+    pnpm build
     ```
 
 2. Start the server:
     ```sh
-    pnpm run start
+    pnpm start
     ```
 
-3. Access the static webpages mounted by the server at `http://localhost:3000/display` & `http://localhost:3000/control`. The display page is for the live stream, and the control page is suggested to be opened in a separate tab for managing the live stream.
+3. The static webpages is now mounted by the server and can be accessed at `http://localhost:3000/display` & `http://localhost:3000/control`.
 
 ## License
 
